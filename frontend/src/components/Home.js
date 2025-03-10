@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';  // Redirect for navigation
+import { useNavigate } from 'react-router-dom'; // Redirect for navigation
 
 const Home = () => {
   const [staff, setStaff] = useState([]);
@@ -8,9 +8,13 @@ const Home = () => {
   const [role, setRole] = useState('');
   const [rolesCount, setRolesCount] = useState({});
   const [recentStaff, setRecentStaff] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [leaveStartDate, setLeaveStartDate] = useState('');
+  const [leaveEndDate, setLeaveEndDate] = useState('');
+  const [reason, setReason] = useState('');
   const navigate = useNavigate(); // Hook for navigation
 
-  // Fetching staff data and roles count on page load
+  // Fetching staff data, roles count, and leave requests on page load
   useEffect(() => {
     // Fetch all staff data
     axios.get('http://localhost:5000/api/staff')
@@ -35,6 +39,15 @@ const Home = () => {
       })
       .catch((error) => {
         console.error('Error fetching recent staff:', error);
+      });
+
+    // Fetch leave requests
+    axios.get('http://localhost:5000/api/leave')
+      .then((response) => {
+        setLeaveRequests(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching leave requests:', error);
       });
   }, []);
 
@@ -77,6 +90,32 @@ const Home = () => {
       });
   };
 
+  // Handle Add Leave Request
+  const handleAddLeaveRequest = () => {
+    const newLeave = { leaveStartDate, leaveEndDate, reason };
+    axios.post('http://localhost:5000/api/leave', newLeave)
+      .then((response) => {
+        setLeaveRequests([...leaveRequests, response.data]);
+        setLeaveStartDate('');
+        setLeaveEndDate('');
+        setReason('');
+      })
+      .catch((error) => {
+        console.error('Error adding leave request:', error);
+      });
+  };
+
+  // Handle Update Leave Request Status
+  const handleUpdateLeaveRequest = (id, status) => {
+    axios.put(`http://localhost:5000/api/leave/${id}`, { status })
+      .then((response) => {
+        setLeaveRequests(leaveRequests.map((leave) => (leave._id === id ? response.data : leave)));
+      })
+      .catch((error) => {
+        console.error('Error updating leave request:', error);
+      });
+  };
+
   // Handle Logout
   const handleLogout = () => {
     navigate('/');  // Redirect to the login page
@@ -113,9 +152,8 @@ const Home = () => {
         </div>
       </div>
 
-      <h2>Staff List</h2>
-
       {/* Staff Management Section */}
+      <h2>Staff List</h2>
       <div>
         <input
           type="text"
@@ -141,6 +179,42 @@ const Home = () => {
           </li>
         ))}
       </ul>
+
+      {/* Leave Management Section */}
+      <h2>Request Leave</h2>
+      <div>
+        <input
+          type="date"
+          value={leaveStartDate}
+          onChange={(e) => setLeaveStartDate(e.target.value)}
+        />
+        <input
+          type="date"
+          value={leaveEndDate}
+          onChange={(e) => setLeaveEndDate(e.target.value)}
+        />
+        <textarea
+          placeholder="Reason for leave"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+        <button onClick={handleAddLeaveRequest}>Request Leave</button>
+      </div>
+
+      <h2>Leave Requests</h2>
+      <ul>
+  {leaveRequests.map((leave) => (
+    <li key={leave._id}>
+      {/* Check if leave.userId and leave.userId.username are available */}
+      <p>{leave.userId && leave.userId.username ? leave.userId.username : 'Unknown User'} requested leave from {leave.leaveStartDate} to {leave.leaveEndDate}</p>
+      <p>Reason: {leave.reason}</p>
+      <p>Status: {leave.status}</p>
+      <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Approved')}>Approve</button>
+      <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Rejected')}>Reject</button>
+    </li>
+  ))}
+</ul>
+
 
       {/* Logout Button */}
       <button onClick={handleLogout}>Logout</button>
@@ -179,6 +253,28 @@ const Home = () => {
         h1, h2 {
           text-align: center;
           color: #333;
+        }
+
+        input, textarea {
+          display: block;
+          margin: 10px 0;
+          padding: 8px;
+          width: 100%;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        }
+
+        button {
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+
+        button:hover {
+          background-color: #45a049;
         }
       `}</style>
     </div>
