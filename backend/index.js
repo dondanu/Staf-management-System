@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/user');  // User model
-const Staff = require('./models/staff');  // Staff model
+const LeaveRequest = require('./models/leaveRequest');  // New Leave Request Model
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,13 +30,11 @@ app.get('/', (req, res) => {
 app.post('/api/register', async (req, res) => {
   const { username, email, password, role } = req.body;
   try {
-    // Check if the email or username already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res.status(400).send('Email or Username already exists');
     }
 
-    // Create new user
     const newUser = new User({ username, email, password, role });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully', user: newUser });
@@ -54,7 +52,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).send('Invalid credentials');
     }
 
-    // Compare entered password with the stored plain text password
     if (user.password === password) {
       res.json({ message: 'Login successful', user });
     } else {
@@ -121,6 +118,56 @@ app.delete('/api/staff/:id', async (req, res) => {
     }
   } catch (err) {
     res.status(400).send('Error deleting staff');
+  }
+});
+
+// Leave Request Schema for leave management
+const leaveRequestSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  leaveStartDate: Date,
+  leaveEndDate: Date,
+  reason: String,
+  status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+});
+
+//const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);
+
+// API to create a leave request
+app.post('/api/leave', async (req, res) => {
+  const { userId, leaveStartDate, leaveEndDate, reason } = req.body;
+
+  try {
+    const newLeaveRequest = new LeaveRequest({ userId, leaveStartDate, leaveEndDate, reason });
+    await newLeaveRequest.save();
+    res.status(201).json(newLeaveRequest);
+  } catch (err) {
+    res.status(400).send('Error creating leave request');
+  }
+});
+
+// API to get all leave requests
+app.get('/api/leave', async (req, res) => {
+  try {
+    const leaveRequests = await LeaveRequest.find().populate('userId', 'username');
+    res.json(leaveRequests);
+  } catch (err) {
+    res.status(500).send('Error fetching leave requests');
+  }
+});
+
+// API to update leave request status (Approve/Reject)
+app.put('/api/leave/:id', async (req, res) => {
+  const { status } = req.body;
+
+  try {
+    const updatedLeave = await LeaveRequest.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (updatedLeave) {
+      res.json(updatedLeave);
+    } else {
+      res.status(404).send('Leave request not found');
+    }
+  } catch (err) {
+    res.status(400).send('Error updating leave request');
   }
 });
 
