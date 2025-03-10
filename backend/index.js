@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/user');  // User model
-const LeaveRequest = require('./models/leaveRequest');  // New Leave Request Model
+const LeaveRequest = require('./models/leaveRequest');  // Leave Request Model
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -82,6 +82,16 @@ app.get('/api/staff', async (req, res) => {
   }
 });
 
+// Get recent staff (last 5 added)
+app.get('/api/staff/recent', async (req, res) => {
+  try {
+    const recentStaff = await Staff.find().sort({ _id: -1 }).limit(5);  // Sort by latest added staff
+    res.json(recentStaff);  // Send recent staff data
+  } catch (err) {
+    res.status(500).send('Error fetching recent staff');
+  }
+});
+
 // Add new staff
 app.post('/api/staff', async (req, res) => {
   try {
@@ -123,14 +133,14 @@ app.delete('/api/staff/:id', async (req, res) => {
 
 // Leave Request Schema for leave management
 const leaveRequestSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },  // Referencing User model
   leaveStartDate: Date,
   leaveEndDate: Date,
   reason: String,
   status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
 });
 
-//const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);
+//const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);  // Add the model
 
 // API to create a leave request
 app.post('/api/leave', async (req, res) => {
@@ -148,7 +158,7 @@ app.post('/api/leave', async (req, res) => {
 // API to get all leave requests
 app.get('/api/leave', async (req, res) => {
   try {
-    const leaveRequests = await LeaveRequest.find().populate('userId', 'username');
+    const leaveRequests = await LeaveRequest.find().populate('userId', 'username');  // Populate username
     res.json(leaveRequests);
   } catch (err) {
     res.status(500).send('Error fetching leave requests');
