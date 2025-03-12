@@ -140,7 +140,7 @@ const leaveRequestSchema = new mongoose.Schema({
   status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
 });
 
-const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);  // Add the model
+const LeaveRequest = mongoose.model('LeaveRequest', leaveRequestSchema);
 
 // API to create a leave request
 app.post('/api/leave', async (req, res) => {
@@ -155,10 +155,10 @@ app.post('/api/leave', async (req, res) => {
   }
 });
 
-// API to get all leave requests
+// API to get all leave requests with populated `userId`
 app.get('/api/leave', async (req, res) => {
   try {
-    const leaveRequests = await LeaveRequest.find().populate('userId', 'username');  // Populate username
+    const leaveRequests = await LeaveRequest.find().populate('userId', 'username');  // Populate username field
     res.json(leaveRequests);
   } catch (err) {
     res.status(500).send('Error fetching leave requests');
