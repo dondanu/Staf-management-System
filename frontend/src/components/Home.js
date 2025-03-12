@@ -12,16 +12,16 @@ const Home = () => {
   const [leaveStartDate, setLeaveStartDate] = useState('');
   const [leaveEndDate, setLeaveEndDate] = useState('');
   const [reason, setReason] = useState('');
+  const [staffId, setStaffId] = useState('');
+  const [selectedStaffName, setSelectedStaffName] = useState(''); // To store the selected staff's name
+  const [darkMode, setDarkMode] = useState(false); // To toggle dark and light modes
   const navigate = useNavigate(); // Hook for navigation
 
   // Fetching staff data, roles count, and leave requests on page load
   useEffect(() => {
-    // Fetch all staff data
     axios.get('http://localhost:5000/api/staff')
       .then((response) => {
         setStaff(response.data);
-
-        // Calculate roles count
         const roles = {};
         response.data.forEach((s) => {
           roles[s.role] = roles[s.role] ? roles[s.role] + 1 : 1;
@@ -32,7 +32,6 @@ const Home = () => {
         console.error('Error fetching staff:', error);
       });
 
-    // Fetch recent staff (last 5 added)
     axios.get('http://localhost:5000/api/staff/recent')
       .then((response) => {
         setRecentStaff(response.data);
@@ -41,7 +40,6 @@ const Home = () => {
         console.error('Error fetching recent staff:', error);
       });
 
-    // Fetch leave requests
     axios.get('http://localhost:5000/api/leave')
       .then((response) => {
         setLeaveRequests(response.data);
@@ -51,12 +49,11 @@ const Home = () => {
       });
   }, []);
 
-  // Handle Add Staff
   const handleAddStaff = () => {
     const newStaff = { name, role };
     axios.post('http://localhost:5000/api/staff', newStaff)
       .then((response) => {
-        setStaff([...staff, response.data]);  // Add new staff to list
+        setStaff([...staff, response.data]);
         setName('');
         setRole('');
       })
@@ -65,12 +62,11 @@ const Home = () => {
       });
   };
 
-  // Handle Update Staff
   const handleUpdateStaff = (id) => {
     const updatedStaff = { name, role };
     axios.put(`http://localhost:5000/api/staff/${id}`, updatedStaff)
       .then((response) => {
-        setStaff(staff.map(s => s._id === id ? response.data : s));  // Update in staff list
+        setStaff(staff.map(s => s._id === id ? response.data : s));
         setName('');
         setRole('');
       })
@@ -79,33 +75,31 @@ const Home = () => {
       });
   };
 
-  // Handle Delete Staff
   const handleDeleteStaff = (id) => {
     axios.delete(`http://localhost:5000/api/staff/${id}`)
       .then(() => {
-        setStaff(staff.filter(s => s._id !== id));  // Remove staff from list
+        setStaff(staff.filter(s => s._id !== id));
       })
       .catch((error) => {
         console.error('Error deleting staff:', error);
       });
   };
 
-  // Handle Add Leave Request
   const handleAddLeaveRequest = () => {
-    const newLeave = { leaveStartDate, leaveEndDate, reason };
+    const newLeave = { userId: staffId, leaveStartDate, leaveEndDate, reason };
     axios.post('http://localhost:5000/api/leave', newLeave)
       .then((response) => {
         setLeaveRequests([...leaveRequests, response.data]);
         setLeaveStartDate('');
         setLeaveEndDate('');
         setReason('');
+        setStaffId('');
       })
       .catch((error) => {
         console.error('Error adding leave request:', error);
       });
   };
 
-  // Handle Update Leave Request Status
   const handleUpdateLeaveRequest = (id, status) => {
     axios.put(`http://localhost:5000/api/leave/${id}`, { status })
       .then((response) => {
@@ -116,169 +110,241 @@ const Home = () => {
       });
   };
 
-  // Handle Logout
   const handleLogout = () => {
-    navigate('/');  // Redirect to the login page
+    navigate('/'); // Redirect to the login page
+  };
+
+  const handleStaffSelection = (e) => {
+    const selectedStaff = staff.find(s => s._id === e.target.value);
+    setSelectedStaffName(selectedStaff ? selectedStaff.name : ''); // Set selected staff name
+  };
+
+  const toggleMode = () => {
+    const mode = prompt('Select Mode: dark or light');
+    if (mode === 'dark') {
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+  };
+
+  const goToAdminPage = () => {
+    navigate('/admin'); // Redirect to Admin page
   };
 
   return (
-    <div>
-      <h1>Welcome to the Staff Management System</h1>
+    <div style={darkMode ? styles.darkContainer : styles.lightContainer}>
+      <header style={styles.header}>
+        <h1>Welcome to the Staff Management System</h1>
+        <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
+        <button onClick={toggleMode} style={styles.modeButton}>Mode</button>
+        <button onClick={goToAdminPage} style={styles.adminButton}>Admin</button>
+      </header>
 
       {/* Dashboard Section */}
-      <h2>Dashboard</h2>
-      <div className="dashboard">
-        <div className="stat-box">
+      <h2 style={styles.sectionHeader}>Dashboard</h2>
+      <div style={styles.dashboard}>
+        <div style={styles.statBox}>
           <h3>Total Staff</h3>
           <p>{staff.length}</p>
         </div>
 
-        <div className="stat-box">
+        <div style={styles.statBox}>
           <h3>Roles Breakdown</h3>
           <ul>
             {Object.entries(rolesCount).map(([role, count]) => (
-              <li key={role}>{role}: {count}</li>
+              <li key={role} style={styles.listItem}>{role}: {count}</li>
             ))}
           </ul>
         </div>
 
-        <div className="stat-box">
+        <div style={styles.statBox}>
           <h3>Recent Staff</h3>
           <ul>
             {recentStaff.map((s) => (
-              <li key={s._id}>{s.name} - {s.role}</li>
+              <li key={s._id} style={styles.listItem}>{s.name} - {s.role}</li>
             ))}
           </ul>
         </div>
       </div>
 
       {/* Staff Management Section */}
-      <h2>Staff List</h2>
-      <div>
+      <h2 style={styles.sectionHeader}>Staff List</h2>
+      <div style={styles.formGroup}>
         <input
           type="text"
           placeholder="Enter name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          style={styles.input}
         />
         <input
           type="text"
           placeholder="Enter role"
           value={role}
           onChange={(e) => setRole(e.target.value)}
+          style={styles.input}
         />
-        <button onClick={handleAddStaff}>Add New Staff</button>
+        <button onClick={handleAddStaff} style={styles.button}>Add New Staff</button>
       </div>
 
       <ul>
         {staff.map(s => (
-          <li key={s._id}>
+          <li key={s._id} style={styles.listItem}>
             {s.name} - {s.role}
-            <button onClick={() => handleUpdateStaff(s._id)}>Update</button>
-            <button onClick={() => handleDeleteStaff(s._id)}>Delete</button>
+            <button onClick={() => handleUpdateStaff(s._id)} style={styles.button}>Update</button>
+            <button onClick={() => handleDeleteStaff(s._id)} style={styles.button}>Delete</button>
           </li>
         ))}
       </ul>
 
       {/* Leave Management Section */}
-      <h2>Request Leave</h2>
-      <div>
+      <h2 style={styles.sectionHeader}>Request Leave</h2>
+      <div style={styles.formGroup}>
+        <select
+          value={staffId}
+          onChange={(e) => {
+            setStaffId(e.target.value);
+            handleStaffSelection(e);
+          }}
+          style={styles.input}
+        >
+          <option value="">Select Staff</option>
+          {staff.map(s => (
+            <option key={s._id} value={s._id}>{s.name} - {s.role}</option>
+          ))}
+        </select>
         <input
           type="date"
           value={leaveStartDate}
           onChange={(e) => setLeaveStartDate(e.target.value)}
+          style={styles.input}
         />
         <input
           type="date"
           value={leaveEndDate}
           onChange={(e) => setLeaveEndDate(e.target.value)}
+          style={styles.input}
         />
         <textarea
           placeholder="Reason for leave"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
+          style={styles.input}
         />
-        <button onClick={handleAddLeaveRequest}>Request Leave</button>
+        <button onClick={handleAddLeaveRequest} style={styles.button}>Request Leave</button>
       </div>
 
-      <h2>Leave Requests</h2>
+      <h2 style={styles.sectionHeader}>Leave Requests</h2>
       <ul>
-  {leaveRequests.map((leave) => (
-    <li key={leave._id}>
-      {/* Check if leave.userId and leave.userId.username are available */}
-      <p>{leave.userId && leave.userId.username ? leave.userId.username : 'Unknown User'} requested leave from {leave.leaveStartDate} to {leave.leaveEndDate}</p>
-      <p>Reason: {leave.reason}</p>
-      <p>Status: {leave.status}</p>
-      <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Approved')}>Approve</button>
-      <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Rejected')}>Reject</button>
-    </li>
-  ))}
-</ul>
-
-
-      {/* Logout Button */}
-      <button onClick={handleLogout}>Logout</button>
-
-      {/* Inline styles for the Dashboard */}
-      <style jsx>{`
-        .dashboard {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 20px;
-        }
-
-        .stat-box {
-          width: 30%;
-          padding: 20px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          text-align: center;
-        }
-
-        .stat-box h3 {
-          margin-bottom: 10px;
-          color: #333;
-        }
-
-        .stat-box ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .stat-box ul li {
-          margin: 5px 0;
-        }
-
-        h1, h2 {
-          text-align: center;
-          color: #333;
-        }
-
-        input, textarea {
-          display: block;
-          margin: 10px 0;
-          padding: 8px;
-          width: 100%;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-
-        button {
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          cursor: pointer;
-          border-radius: 4px;
-        }
-
-        button:hover {
-          background-color: #45a049;
-        }
-      `}</style>
+        {leaveRequests.map((leave) => (
+          <li key={leave._id} style={styles.listItem}>
+            <p>{selectedStaffName ? selectedStaffName : 'Unknown User'} requested leave from {leave.leaveStartDate} to {leave.leaveEndDate}</p>
+            <p>Reason: {leave.reason}</p>
+            <p>Status: {leave.status}</p>
+            <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Approved')} style={styles.button}>Approve</button>
+            <button onClick={() => handleUpdateLeaveRequest(leave._id, 'Rejected')} style={styles.button}>Reject</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
+};
+
+// Inline styles for the UI
+const styles = {
+  lightContainer: {
+    fontFamily: 'Arial, sans-serif',
+    margin: '20px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '8px',
+    padding: '20px',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  darkContainer: {
+    fontFamily: 'Arial, sans-serif',
+    margin: '20px',
+    backgroundColor: '#333',
+    color: '#fff',
+    borderRadius: '8px',
+    padding: '20px',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  logoutButton: {
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  modeButton: {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  adminButton: {
+    backgroundColor: '#3b5998',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  sectionHeader: {
+    color: '#333',
+    marginBottom: '10px',
+  },
+  dashboard: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '20px',
+  },
+  statBox: {
+    width: '30%',
+    padding: '20px',
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+  },
+  listItem: {
+    margin: '8px 0',
+    fontSize: '16px',
+  },
+  input: {
+    display: 'block',
+    width: '100%',
+    margin: '10px 0',
+    padding: '8px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    margin: '5px',
+    transition: '0.3s',
+  },
+  formGroup: {
+    marginBottom: '20px',
+  },
 };
 
 export default Home;
