@@ -166,6 +166,8 @@ const Home = () => {
           style={styles.searchInput}
         />
         <button onClick={goToAdminPage} style={styles.adminButton}>Admin</button>
+        <button onClick={() => alert("Help Information")} style={styles.helpButton}>Help</button>
+        <button onClick={() => alert("Send Message to Staff")} style={styles.messageButton}>Feedback</button>
       </header>
 
       {/* Introductory Section */}
@@ -356,6 +358,24 @@ const styles = {
   },
   adminButton: {
     backgroundColor: '#3b5998',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  helpButton: {
+    backgroundColor: '#2196F3',
+    color: 'white',
+    border: 'none',
+    padding: '12px 25px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '16px',
+  },
+  messageButton: {
+    backgroundColor: '#FF5722',
     color: 'white',
     border: 'none',
     padding: '12px 25px',
