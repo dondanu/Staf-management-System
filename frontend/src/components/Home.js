@@ -155,7 +155,7 @@ const Home = () => {
   return (
     <div style={darkMode ? styles.darkContainer : styles.lightContainer}>
       <header style={styles.header}>
-        <h1>Staff Management System</h1>
+        <h1 style={styles.headerTitle}>Staff Management System</h1>
         <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
         <button onClick={toggleMode} style={styles.modeButton}>Mode</button>
         <input
@@ -172,29 +172,31 @@ const Home = () => {
 
       {/* Introductory Section */}
       <section style={styles.introSection}>
-        <h2>Welcome to Our Staff Management System</h2>
+        <h2 style={styles.sectionTitle}>Welcome to Our Staff Management System</h2>
         <p>
           We believe in empowering businesses with the tools they need to streamline their operations. Our Staff Management System is the perfect solution to take the hassle out of managing your team. Whether you are a small startup or a growing enterprise, our system ensures that your team data, leave requests, and roles are managed effortlessly.
         </p>
-        <h3>Why Choose Our System?</h3>
-        <ul>
-          <li>Effortless Staff Management: Quickly add, update, or remove staff members with just a few clicks. Your team’s data will always be organized and easy to access.</li>
-          <li>Leave Management Made Simple: Employees can request leave with ease, and managers can approve or reject leave requests in real-time, ensuring smooth operations.</li>
-          <li>Role-Based Insights: With a detailed breakdown of roles and responsibilities, gain valuable insights into your team’s structure and ensure optimal resource allocation.</li>
-          <li>Data Security & Flexibility: All your staff data is stored securely, and the system is designed to adapt to the evolving needs of your business.</li>
-        </ul>
-        <h3>Key Features:</h3>
-        <ul>
-          <li>Search & Filter: Find staff and requests faster than ever with our advanced search features.</li>
-          <li>Seamless Integration: Easily integrate with your existing workflow and systems to ensure minimal disruption.</li>
-          <li>Real-Time Data Access: Stay updated with real-time data and make informed decisions quickly.</li>
-        </ul>
-        <h3>How It Helps Your Business:</h3>
-        <ul>
-          <li>Increased Efficiency: Say goodbye to manual data entry and time-consuming tasks. Our system automates much of the work, saving you time.</li>
-          <li>Better Resource Management: Keep track of team roles, manage attendance, and ensure that no resources are over or under-utilized.</li>
-          <li>Enhanced Communication: Staff and management can collaborate effortlessly, with leave requests, approvals, and updates happening instantly.</li>
-        </ul>
+
+        {/* Why Choose Our System? */}
+        <div style={styles.subSection}>
+          <h3 style={styles.subHeading}>Why Choose Our System?</h3>
+          <ul>
+            <li>Effortless Staff Management: Quickly add, update, or remove staff members with just a few clicks. Your team’s data will always be organized and easy to access.</li>
+            <li>Leave Management Made Simple: Employees can request leave with ease, and managers can approve or reject leave requests in real-time, ensuring smooth operations.</li>
+            <li>Role-Based Insights: With a detailed breakdown of roles and responsibilities, gain valuable insights into your team’s structure and ensure optimal resource allocation.</li>
+            <li>Data Security & Flexibility: All your staff data is stored securely, and the system is designed to adapt to the evolving needs of your business.</li>
+          </ul>
+        </div>
+
+        {/* How It Helps Your Business */}
+        <div style={styles.subSection}>
+          <h3 style={styles.subHeading}>How It Helps Your Business:</h3>
+          <ul>
+            <li>Increased Efficiency: Say goodbye to manual data entry and time-consuming tasks. Our system automates much of the work, saving you time.</li>
+            <li>Better Resource Management: Keep track of team roles, manage attendance, and ensure that no resources are over or under-utilized.</li>
+            <li>Enhanced Communication: Staff and management can collaborate effortlessly, with leave requests, approvals, and updates happening instantly.</li>
+          </ul>
+        </div>
         <p>Transform how your team operates with our Staff Management System. Try it today and experience a new level of productivity and control!</p>
       </section>
 
@@ -204,7 +206,9 @@ const Home = () => {
         <div className="carousel-wrapper" id="carousel-wrapper" style={styles.carouselWrapper}>
           {/* Logos */}
           <div className="carousel-item" style={styles.carouselItem}><img src="https://res.cloudinary.com/www-hibob-com/w_550,h_64,c_fit/fl_lossy,f_auto,q_auto/wp-website/uploads/VaynerMedia-black.png" alt="Vayner Media logo" style={styles.carouselItemImage} /></div>
-          {/* Add more logos as before */}
+          <div className="carousel-item" style={styles.carouselItem}><img src="https://res.cloudinary.com/www-hibob-com/w_550,h_99,c_fit/fl_lossy,f_auto,q_auto/wp-website/uploads/Multi-Media-LLC-black.png" alt="Multi Media LLC logo" style={styles.carouselItemImage} /></div>
+          <div className="carousel-item" style={styles.carouselItem}><img src="https://res.cloudinary.com/www-hibob-com/w_550,h_105,c_fit/fl_lossy,f_auto,q_auto/wp-website/uploads/What3words-black.png" alt="What3words logo" style={styles.carouselItemImage} /></div>
+          <div className="carousel-item" style={styles.carouselItem}><img src="https://res.cloudinary.com/www-hibob-com/w_74,h_100,c_fit/fl_lossy,f_auto,q_auto/wp-website/uploads/FFC-Singular-Crest_Black-e1730992684286.png" alt="Fulham FC logo" style={styles.carouselItemImage} /></div>
         </div>
       </section>
 
@@ -343,6 +347,13 @@ const styles = {
     alignItems: 'center',
     marginBottom: '20px',
   },
+  headerTitle: {
+    color: '#1E90FF',
+    fontSize: '32px',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: '2px',
+  },
   logoutButton: {
     backgroundColor: '#f44336',
     color: 'white',
@@ -402,6 +413,23 @@ const styles = {
     marginBottom: '20px',
     textAlign: 'center',
     borderRadius: '8px',
+  },
+  sectionTitle: {
+    color: '#FF6347',
+    fontSize: '26px',
+    fontWeight: '600',
+    animation: 'fadeIn 2s ease-in-out',
+  },
+  subSection: {
+    marginBottom: '20px',
+    textAlign: 'left',
+  },
+  subHeading: {
+    fontSize: '20px',
+    color: '#4CAF50',
+    marginBottom: '10px',
+    fontWeight: 'bold',
+    animation: 'bounceIn 2s ease-in-out',
   },
   carouselContainer: {
     width: '100%',
